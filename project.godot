@@ -10,3 +10,7 @@ config/features=PackedStringArray("4.7")
 [autoload]
 
 EventBus="*res://scripts/event_bus.gd"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot_ai/plugin.cfg")
