@@ -33,6 +33,25 @@ func record_action(stream: String) -> void:
 	actions[stream] = actions.get(stream, 0) + 1
 
 
+## Stream -> share of this player's finished actions (empty when they have none).
+func action_shares() -> Dictionary:
+	var total := 0
+	for n: int in actions.values():
+		total += n
+	var shares := {}
+	for s: String in actions:
+		shares[s] = float(actions[s]) / total
+	return shares
+
+
+## "mul" multiplies the stat (starting at 1.0); "add" adds to it (starting at 0.0).
+func add_stat(stat: String, op: String, value: float) -> void:
+	if op == "mul":
+		stats[stat] = stats.get(stat, 1.0) * value
+	else:
+		stats[stat] = stats.get(stat, 0.0) + value
+
+
 func intent_move() -> Vector2:
 	if use_scripted:
 		return scripted_move

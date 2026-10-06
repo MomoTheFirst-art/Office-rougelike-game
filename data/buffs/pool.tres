@@ -1,0 +1,107 @@
+[gd_resource type="Resource" script_class="BuffPool" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/buff_def.gd" id="1_fo03c"]
+[ext_resource type="Script" path="res://scripts/data/buff_pool.gd" id="2_thtme"]
+
+[sub_resource type="Resource" id="Resource_80gxv"]
+script = ExtResource("1_fo03c")
+id = "fast_fingers"
+title = "Fast fingers"
+description = "tickets 15% faster"
+stream = "tickets"
+stat = "hold_tickets"
+value = 0.85
+
+[sub_resource type="Resource" id="Resource_cck47"]
+script = ExtResource("1_fo03c")
+id = "phone_voice"
+title = "Phone voice"
+description = "tickets 15% faster"
+stream = "tickets"
+stat = "hold_tickets"
+value = 0.85
+
+[sub_resource type="Resource" id="Resource_srkmp"]
+script = ExtResource("1_fo03c")
+id = "debug_mode"
+title = "Debug mode"
+description = "bug fixes 15% faster"
+stream = "bugs"
+stat = "hold_bugs"
+value = 0.85
+
+[sub_resource type="Resource" id="Resource_4cxd4"]
+script = ExtResource("1_fo03c")
+id = "rubber_duck"
+title = "Rubber duck"
+description = "bug fixes 15% faster"
+stream = "bugs"
+stat = "hold_bugs"
+value = 0.85
+
+[sub_resource type="Resource" id="Resource_ys6wy"]
+script = ExtResource("1_fo03c")
+id = "smooth_talker"
+title = "Smooth talker"
+description = "sales 15% faster"
+stream = "business"
+stat = "hold_business"
+value = 0.85
+
+[sub_resource type="Resource" id="Resource_1s6fo"]
+script = ExtResource("1_fo03c")
+id = "firm_handshake"
+title = "Firm handshake"
+description = "sales 15% faster"
+stream = "business"
+stat = "hold_business"
+value = 0.85
+
+[sub_resource type="Resource" id="Resource_2ivea"]
+script = ExtResource("1_fo03c")
+id = "spin_doctor"
+title = "Spin doctor"
+description = "PR 15% faster"
+stream = "pr"
+stat = "hold_pr"
+value = 0.85
+
+[sub_resource type="Resource" id="Resource_p8a8b"]
+script = ExtResource("1_fo03c")
+id = "good_hair"
+title = "Camera-ready"
+description = "PR 15% faster"
+stream = "pr"
+stat = "hold_pr"
+value = 0.85
+
+[sub_resource type="Resource" id="Resource_ggahc"]
+script = ExtResource("1_fo03c")
+id = "running_shoes"
+title = "Running shoes"
+description = "move 10% faster"
+stream = "mobility"
+stat = "move_speed"
+value = 1.1
+
+[sub_resource type="Resource" id="Resource_b4sbj"]
+script = ExtResource("1_fo03c")
+id = "office_chair"
+title = "Rolling chair"
+description = "move 10% faster"
+stream = "mobility"
+stat = "move_speed"
+value = 1.1
+
+[sub_resource type="Resource" id="Resource_3k5l7"]
+script = ExtResource("1_fo03c")
+id = "extra_shell"
+title = "Extra shell"
+description = "toy shotgun +1 ammo"
+stream = "mobility"
+stat = "shotgun_ammo"
+op = "add"
+
+[resource]
+script = ExtResource("2_thtme")
+buffs = Array[ExtResource("1_fo03c")]([SubResource("Resource_80gxv"), SubResource("Resource_cck47"), SubResource("Resource_srkmp"), SubResource("Resource_4cxd4"), SubResource("Resource_ys6wy"), SubResource("Resource_1s6fo"), SubResource("Resource_2ivea"), SubResource("Resource_p8a8b"), SubResource("Resource_ggahc"), SubResource("Resource_b4sbj"), SubResource("Resource_3k5l7")])

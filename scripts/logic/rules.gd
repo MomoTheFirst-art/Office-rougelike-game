@@ -41,6 +41,52 @@ static func promoted(end_satisfaction: float, rival_bar: float, b: Balance) -> b
 	return end_satisfaction >= b.promo_threshold and rival_bar < 100.0
 
 
+const MOBILITY_WEIGHT := 2.0
+
+
+## Draw weight for a buff of a work type the player did `share` of their actions in.
+static func buff_weight(share: float) -> float:
+	return 1.0 + 4.0 * share
+
+
+static func _weighted_pick(cands: Array, shares: Dictionary, rng: RandomNumberGenerator) -> BuffDef:
+	var weights: Array[float] = []
+	var total := 0.0
+	for d: BuffDef in cands:
+		var w := MOBILITY_WEIGHT if d.stream == "mobility" else buff_weight(shares.get(d.stream, 0.0))
+		weights.append(w)
+		total += w
+	var roll := rng.randf() * total
+	for i in cands.size():
+		roll -= weights[i]
+		if roll <= 0.0:
+			return cands[i]
+	return cands[cands.size() - 1]
+
+
+## Three distinct cards: one drawn from the player's top work type (if the pool has any), the rest weighted.
+static func draw_offers(pool: Array[BuffDef], shares: Dictionary, rng: RandomNumberGenerator) -> Array[BuffDef]:
+	var offers: Array[BuffDef] = []
+	var remaining := pool.duplicate()
+	var top := ""
+	var best := 0.0
+	for s: String in shares:
+		if shares[s] > best:
+			best = shares[s]
+			top = s
+	if top != "":
+		var cands := remaining.filter(func(d: BuffDef): return d.stream == top)
+		if not cands.is_empty():
+			var pick := _weighted_pick(cands, shares, rng)
+			offers.append(pick)
+			remaining.erase(pick)
+	while offers.size() < 3 and not remaining.is_empty():
+		var pick := _weighted_pick(remaining, shares, rng)
+		offers.append(pick)
+		remaining.erase(pick)
+	return offers
+
+
 ## Majority pad wins; tied pads are chosen between at random; nobody locked means all are tied.
 static func pick_meeting_pad(votes: Array[int], rng: RandomNumberGenerator) -> int:
 	var top: int = votes.max()

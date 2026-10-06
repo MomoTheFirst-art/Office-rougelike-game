@@ -9,6 +9,7 @@ var _stab: ProgressBar
 var _queue: Label
 var _end: Label
 var _banner: Label
+var _cards: Label
 
 
 func setup(d: RunDirector) -> void:
@@ -32,6 +33,9 @@ func setup(d: RunDirector) -> void:
 	_banner = Label.new()
 	_banner.add_theme_font_size_override("font_size", 24)
 	box.add_child(_banner)
+	_cards = Label.new()
+	_cards.add_theme_font_size_override("font_size", 22)
+	box.add_child(_cards)
 	_end = Label.new()
 	_end.visible = false
 	_end.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -47,6 +51,7 @@ func _process(_delta: float) -> void:
 	_status.text = "Level %d   Time %d s" % [director.level, ceili(director.time_left)]
 	_sat.value = director.satisfaction
 	_stab.value = director.stability
+	_cards.text = _cards_text()
 	if director.meeting != null:
 		_banner.text = "%s: stand on a pad (%d s)" % [director.meeting.def.title, ceili(director.meeting.time_left)]
 	elif director.next_meeting_in() <= director.b.meeting_warning:
@@ -62,6 +67,16 @@ func _process(_delta: float) -> void:
 	_queue.text = "Quests:\n" + "\n".join(quest_lines) + "\n\nOpen work:\n" + "\n".join(lines)
 
 
+func _cards_text() -> String:
+	if director.players.is_empty() or not director.buff_offers.has(director.players[0]):
+		return ""
+	var lines: PackedStringArray = ["Pick a buff (press 1, 2 or 3):"]
+	var offers: Array = director.buff_offers[director.players[0]]
+	for i in offers.size():
+		lines.append("%d) %s - %s" % [i + 1, offers[i].title, offers[i].description])
+	return "\n".join(lines)
+
+
 func _on_run_ended(r: Dictionary) -> void:
 	var title := "YOU WERE FIRED" if r["outcome"] == "fired" else "WORKDAY OVER"
 	var promo := "PROMOTED! Next run is level %d" % RunDirector.carried_level if r["promoted"] else "No promotion"
@@ -71,5 +86,9 @@ func _on_run_ended(r: Dictionary) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not director.players.is_empty():
+		var index: int = event.keycode - KEY_1
+		if index >= 0 and index < 3:
+			director.choose_buff(director.players[0], index)
 	if _end != null and _end.visible and event.is_action_pressed("ui_accept"):
 		get_tree().reload_current_scene()

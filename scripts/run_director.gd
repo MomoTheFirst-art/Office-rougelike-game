@@ -31,6 +31,9 @@ var target_mults := {}  # quest -> multiplier from meeting choices
 var payout_mult := 1.0
 var _boosts: Array = []  # {stream, mult, left} spawn boosts from meeting choices
 var _meeting_next := 0
+var buff_pool: BuffPool
+var buff_offers := {}  # Player -> Array[BuffDef] waiting for a pick
+var _buff_left := 0.0
 
 
 func start(p: Array[Player], seed_value: int, run_level := 1) -> void:
@@ -55,11 +58,13 @@ func start(p: Array[Player], seed_value: int, run_level := 1) -> void:
 	_boosts.clear()
 	_meeting_next = 0
 	meeting = null
+	buff_offers.clear()
 	meeting_defs.clear()
 	meeting_at.clear()
 	if Rules.unlocked("meetings", level, b):
 		for n in ["client", "manager", "ceo"]:
 			meeting_defs.append(load("res://data/meetings/%s.tres" % n) as MeetingDef)
+		buff_pool = load("res://data/buffs/pool.tres") as BuffPool
 		for t in b.meeting_times:
 			meeting_at.append(t * b.run_seconds + rng.randf_range(0.0, 10.0))
 	running = true
@@ -101,6 +106,7 @@ func tick(dt: float) -> void:
 		return
 	time_left -= dt
 	_tick_boosts(dt)
+	_tick_buff_timeout(dt)
 	_spawn_work(dt)
 	for it in items.duplicate():
 		it.deadline -= dt
@@ -281,6 +287,30 @@ func _tick_stability(dt: float) -> void:
 		_outage_timer = 0.0
 
 
+## Each player picks one of three cards; the card stays until picked or the timeout picks for them.
+func _offer_buffs() -> void:
+	for p in players:
+		buff_offers[p] = Rules.draw_offers(buff_pool.buffs, p.action_shares(), rng)
+	_buff_left = b.buff_timeout
+
+
+func choose_buff(player: Player, index: int) -> void:
+	if not buff_offers.has(player):
+		return
+	var card: BuffDef = buff_offers[player][index]
+	player.add_stat(card.stat, card.op, card.value)
+	buff_offers.erase(player)
+
+
+func _tick_buff_timeout(dt: float) -> void:
+	if buff_offers.is_empty():
+		return
+	_buff_left -= dt
+	if _buff_left <= 0.0:
+		for p: Player in buff_offers.keys():
+			choose_buff(p, rng.randi_range(0, buff_offers[p].size() - 1))
+
+
 func _tick_boosts(dt: float) -> void:
 	for bo in _boosts:
 		bo["left"] -= dt
@@ -304,6 +334,7 @@ func _on_meeting_finished(pad: int, def: MeetingDef) -> void:
 	apply_effects(def.effects[pad])
 	meeting.queue_free()
 	meeting = null
+	_offer_buffs()
 	EventBus.meeting_ended.emit(def, pad)
 
 
