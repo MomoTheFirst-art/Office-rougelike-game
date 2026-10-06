@@ -24,7 +24,7 @@ Out (later specs): shop and persistent Bonus currency, promotion levels beyond d
 
 ## 3. Core interaction
 
-One reusable `Station` (`Area3D`). A player stands inside, a bar fills, leaving resets that step's bar, completion emits `completed(player)`. Seconds to fill = base seconds x the player's stat multiplier for that kind. The same component serves desks, phone, dev table, sales PC, comms desk, studio, meeting pads, and the "call out the rival" spot. A station works the open item nearest its deadline; there are no menus.
+One reusable `Station` (`Area3D`). A player stands inside, a bar fills, leaving resets that step's bar, completion emits `completed(player)`. Seconds to fill = base seconds x the player's stat multiplier for that kind. The same component serves PC desks, phone, dev table, sales PC, studio, outbox board, meeting pads, and the "call out the rival" spot. A station works the open item nearest its deadline; there are no menus.
 
 ## 4. Work streams
 
