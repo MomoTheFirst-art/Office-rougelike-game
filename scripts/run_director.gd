@@ -18,7 +18,8 @@ var running := false
 var outcome := ""
 var stations: Array[Station] = []
 var bugticket_share := 0.0
-var rival_bar := 0.0  # set by the Climber (Task 9)
+var rival_bar := 0.0  # the Climber's promotion race: 100 means no promotion
+var recent_solves: Array = []  # {quest, amount} per finished item, newest last
 var _ticket_timer := 0.0
 var _bug_timer := 0.0
 var _lead_timer := 0.0
@@ -59,6 +60,8 @@ func start(p: Array[Player], seed_value: int, run_level := 1) -> void:
 	_meeting_next = 0
 	meeting = null
 	buff_offers.clear()
+	recent_solves.clear()
+	rival_bar = 0.0
 	meeting_defs.clear()
 	meeting_at.clear()
 	if Rules.unlocked("meetings", level, b):
@@ -106,6 +109,8 @@ func tick(dt: float) -> void:
 		return
 	time_left -= dt
 	_tick_boosts(dt)
+	if Rules.unlocked("npcs", level, b):
+		rival_bar = minf(100.0, rival_bar + b.climber_creep * dt)
 	_tick_buff_timeout(dt)
 	_spawn_work(dt)
 	for it in items.duplicate():
@@ -140,6 +145,7 @@ func on_station_completed(kind: String, player: Player) -> void:
 	satisfaction = clampf(satisfaction + fx["satisfaction"], 0.0, 100.0)
 	for q: String in fx["quest"]:
 		quests[q] += fx["quest"][q]
+		recent_solves.append({"quest": q, "amount": fx["quest"][q]})
 	it.stage = fx["stage"]
 	if fx["spawn_bug"]:
 		var bug := _new_item("bug", INF)
@@ -153,6 +159,14 @@ func on_station_completed(kind: String, player: Player) -> void:
 		if player != null:
 			player.record_action(it.stream())
 		EventBus.item_done.emit(it, player)
+
+
+## The Climber steals credit for the last n solves and moves toward the promotion.
+func steal(n: int) -> void:
+	for i in mini(n, recent_solves.size()):
+		var s: Dictionary = recent_solves.pop_back()
+		quests[s["quest"]] = maxf(0.0, quests[s["quest"]] - s["amount"])
+	rival_bar = clampf(rival_bar + b.climber_steal_bar, 0.0, 100.0)
 
 
 func end_run(reason: String) -> void:

@@ -2,6 +2,7 @@ extends Node3D
 ## Builds the world in code (placeholder boxes) and wires the run together.
 
 const FLOOR_SIZE := Vector3(24.0, 0.2, 16.0)
+const OUTBOX_POS := Vector3(0, 0, -7)
 
 var players_root: Node3D
 var director: RunDirector
@@ -60,12 +61,42 @@ func _build_npcs() -> void:
 	chatter.home = chatter.position
 	chatter.cooldown_left = chatter.cooldown_seconds() * 0.5
 	npcs.append(chatter)
+	_build_outbox()
+	var climber := Climber.new()
+	climber.name = "Climber"
+	climber.b = b
+	climber.level = director.level
+	climber.director = director
+	add_child(climber)
+	climber.position = Vector3(10, 0, 7)
+	climber.home = climber.position
+	climber.board = OUTBOX_POS
+	climber.cooldown_left = climber.interval() * 0.5
+	var callout := Station.new()
+	callout.name = "Callout"
+	climber.add_child(callout)
+	callout.setup("callout", b.hold_callout, Vector3(2.5, 0.1, 2.5), Color(1, 1, 0))
+	callout.players = player_list
+	callout.completed.connect(func(_pl: Player): climber.call_out())
+	climber.callout = callout
+	npcs.append(climber)
+
+
+## The board where finished work posts its credit; the Climber walks here to steal it.
+func _build_outbox() -> void:
+	var board := MeshInstance3D.new()
+	board.name = "Outbox"
+	var box := BoxMesh.new()
+	box.size = Vector3(4, 2, 0.3)
+	board.mesh = box
+	add_child(board)
+	board.position = OUTBOX_POS + Vector3(0, 1, -0.8)
 
 
 func _set_npcs_active(on: bool) -> void:
 	for n in npcs:
 		n.visible = on
-		n.set_physics_process(on)
+		n.process_mode = Node.PROCESS_MODE_INHERIT if on else Node.PROCESS_MODE_DISABLED
 
 
 ## Locked features stay hidden (the director also keeps them disabled).

@@ -69,6 +69,16 @@ extends Resource
 @export var chatter_work_mult := 0.5
 @export var stun_chatter := 4.0
 
+@export_group("Climber")
+@export var climber_speed := 2.5
+@export var climber_interval := 45.0
+@export var climber_steal_hold := 4.0
+@export var climber_steal_bar := 10.0
+@export var climber_creep := 0.05  # his bar rises this much per second on its own
+@export var climber_steal_back := 3  # recent solves removed per completed steal
+@export var climber_away := 30.0  # seconds sent away after being called out
+@export var stun_climber := 5.0
+
 @export_group("Meetings and buffs")
 @export var meeting_times := PackedFloat32Array([0.25, 0.5, 0.75])
 @export var meeting_countdown := 15.0

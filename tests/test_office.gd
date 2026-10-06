@@ -49,16 +49,20 @@ func test_chatter_exists_only_from_level_6_and_leaves_during_meetings() -> void:
 	var office: Node3D = load("res://main.tscn").instantiate()
 	tree.root.add_child(office)
 	T.truth(office.has_node("Chatter"), "Chatter at level 6")
+	T.truth(office.has_node("Climber") and office.has_node("Outbox"), "Climber and outbox at level 6")
 	var chatter: Chatter = office.get_node("Chatter")
+	var climber: Climber = office.get_node("Climber")
 	var d: RunDirector = office.director
 	d.meeting_at = [0.5, 1.0e9, 1.0e9] as Array[float]
 	for i in int(1.0 / DT):
 		d.tick(DT)
 	T.truth(d.meeting != null, "meeting open")
-	T.eq([chatter.visible, chatter.is_physics_processing()], [false, false], "Chatter gone during the meeting")
+	T.eq([chatter.visible, chatter.can_process()], [false, false], "Chatter gone during the meeting")
+	T.eq([climber.visible, climber.can_process(), climber.callout.can_process()], [false, false, false], "Climber and his call-out spot gone")
 	for i in int(16.0 / DT):
 		d.tick(DT)
-	T.eq([chatter.visible, chatter.is_physics_processing()], [true, true], "Chatter back")
+	T.eq([chatter.visible, chatter.can_process()], [true, true], "Chatter back")
+	T.eq([climber.visible, climber.can_process(), climber.callout.can_process()], [true, true, true], "Climber back")
 	office.free()
 	RunDirector.carried_level = 1
 

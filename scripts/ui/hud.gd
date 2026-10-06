@@ -6,6 +6,7 @@ var director: RunDirector
 var _status: Label
 var _sat: ProgressBar
 var _stab: ProgressBar
+var _rival: ProgressBar
 var _queue: Label
 var _end: Label
 var _banner: Label
@@ -28,6 +29,12 @@ func setup(d: RunDirector) -> void:
 	_stab.max_value = 100.0
 	_stab.visible = Rules.unlocked("stability", d.level, d.b)
 	box.add_child(_stab)
+	_rival = ProgressBar.new()
+	_rival.custom_minimum_size = Vector2(260, 18)
+	_rival.max_value = 100.0
+	_rival.visible = Rules.unlocked("npcs", d.level, d.b)
+	_rival.modulate = Color(1.0, 0.3, 0.6)
+	box.add_child(_rival)
 	_queue = Label.new()
 	box.add_child(_queue)
 	_banner = Label.new()
@@ -51,6 +58,7 @@ func _process(_delta: float) -> void:
 	_status.text = "Level %d   Time %d s" % [director.level, ceili(director.time_left)]
 	_sat.value = director.satisfaction
 	_stab.value = director.stability
+	_rival.value = director.rival_bar
 	_cards.text = _cards_text()
 	if director.meeting != null:
 		_banner.text = "%s: stand on a pad (%d s)" % [director.meeting.def.title, ceili(director.meeting.time_left)]
