@@ -53,17 +53,17 @@ func tick(delta: float) -> void:
 				break
 	if holder == null or not enabled:
 		progress = 0.0
-		_update_label()
+		refresh_label()
 		return
 	var seconds := Rules.hold_seconds(base_hold * hold_mult, holder.stats, "hold_" + stream)
 	progress += delta / (seconds / holder.work_rate)
 	if progress >= 1.0:
 		progress = 0.0
 		completed.emit(holder)
-	_update_label()
+	refresh_label()
 
 
-func _update_label() -> void:
+func refresh_label() -> void:
 	if label == null:
 		return
 	label.text = (caption if caption != "" else kind) + (" *" if enabled and caption == "" else "")

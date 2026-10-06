@@ -163,6 +163,8 @@ func on_station_completed(kind: String, player: Player) -> void:
 
 ## The Climber steals credit for the last n solves and moves toward the promotion.
 func steal(n: int) -> void:
+	if not running:
+		return
 	for i in mini(n, recent_solves.size()):
 		var s: Dictionary = recent_solves.pop_back()
 		quests[s["quest"]] = maxf(0.0, quests[s["quest"]] - s["amount"])
@@ -254,8 +256,12 @@ func _bug_interval() -> float:
 	return b.interval_bug / (1.0 + b.bug_rate_per_level * maxi(level - 2, 0))
 
 
+func _rate(stream: String) -> float:
+	return Rules.rate_mult(stream, maxi(players.size(), 1), level, b) * boost(stream)
+
+
 func _spawn_work(dt: float) -> void:
-	_ticket_timer -= dt * boost("tickets")
+	_ticket_timer -= dt * _rate("tickets")
 	if _ticket_timer <= 0.0:
 		_ticket_timer += b.interval_ticket
 		_spawn_ticket()
@@ -265,12 +271,12 @@ func _spawn_work(dt: float) -> void:
 			_bug_timer += _bug_interval()
 			_new_item("bug", INF)
 	if Rules.unlocked("leads", level, b):
-		_lead_timer -= dt * boost("business")
+		_lead_timer -= dt * _rate("business")
 		if _lead_timer <= 0.0:
 			_lead_timer += b.interval_lead
 			_new_item("lead", b.deadline_lead).size = rng.randi_range(0, 2)
 	if Rules.unlocked("pr", level, b):
-		_pr_timer -= dt * boost("pr")
+		_pr_timer -= dt * _rate("pr")
 		if _pr_timer <= 0.0:
 			_pr_timer += b.interval_pr
 			_new_item("pr", b.deadline_pr)
@@ -303,8 +309,10 @@ func _tick_stability(dt: float) -> void:
 
 ## Each player picks one of three cards; the card stays until picked or the timeout picks for them.
 func _offer_buffs() -> void:
+	var pool: Array[BuffDef] = []
+	pool.assign(buff_pool.buffs.filter(func(d: BuffDef): return d.feature == "" or Rules.unlocked(d.feature, level, b)))
 	for p in players:
-		buff_offers[p] = Rules.draw_offers(buff_pool.buffs, p.action_shares(), rng)
+		buff_offers[p] = Rules.draw_offers(pool, p.action_shares(), rng)
 	_buff_left = b.buff_timeout
 
 

@@ -98,6 +98,7 @@ script = ExtResource("1_fo03c")
 id = "extra_shell"
 title = "Extra shell"
 description = "toy shotgun +1 ammo"
+feature = "npcs"
 stream = "mobility"
 stat = "shotgun_ammo"
 op = "add"

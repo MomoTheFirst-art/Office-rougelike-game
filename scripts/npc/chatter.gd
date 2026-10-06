@@ -56,6 +56,13 @@ func pick_target() -> Player:
 	return best
 
 
+## A meeting starts: drop any talk or approach and head home, so nobody stays slowed.
+func interrupt() -> void:
+	if state == State.TALK or state == State.APPROACH:
+		_release()
+		_begin_leave()
+
+
 ## A stun ends any talk at once. Stunning a stunned NPC refreshes the time; it does not stack.
 func stun(seconds: float) -> void:
 	_release()

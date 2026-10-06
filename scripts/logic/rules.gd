@@ -41,6 +41,19 @@ static func promoted(end_satisfaction: float, rival_bar: float, b: Balance) -> b
 	return end_satisfaction >= b.promo_threshold and rival_bar < 100.0
 
 
+## How much faster a stream spawns than its base interval: it grows with the same level and
+## player factors as that stream's quest target, so the target stays reachable.
+static func rate_mult(stream: String, players: int, level: int, b: Balance) -> float:
+	match stream:
+		"tickets":
+			return players * (1.0 + b.ticket_level_growth * (level - 1))
+		"business":
+			return players * (1.0 + b.revenue_level_growth * (level - 1))
+		"pr":
+			return (b.pr_base + b.pr_per_level * level) / (b.pr_base + b.pr_per_level)
+	return 1.0
+
+
 const MOBILITY_WEIGHT := 2.0
 
 

@@ -33,6 +33,7 @@ func _ready() -> void:
 	_build_npcs()
 	EventBus.meeting_started.connect(_on_meeting_started)
 	EventBus.meeting_ended.connect(_on_meeting_ended)
+	EventBus.run_ended.connect(_on_run_ended)
 	var hud := Hud.new()
 	add_child(hud)
 	hud.setup(director)
@@ -120,7 +121,16 @@ func _show_stations() -> void:
 func _on_meeting_started(_def) -> void:
 	for s in director.stations:
 		s.visible = false
+	for n in npcs:
+		if n.has_method("interrupt"):
+			n.interrupt()
 	_set_npcs_active(false)
+
+
+## The run is over: freeze the NPCs where they stand (they stay visible behind the end screen).
+func _on_run_ended(_result: Dictionary) -> void:
+	for n in npcs:
+		n.process_mode = Node.PROCESS_MODE_DISABLED
 
 
 func _on_meeting_ended(_def, _pad: int) -> void:

@@ -18,7 +18,7 @@ func _save(res: Resource, path: String) -> bool:
 	return err == OK
 
 
-func _buff(id: String, title: String, desc: String, stream: String, stat: String, op: String, value: float) -> BuffDef:
+func _buff(id: String, title: String, desc: String, stream: String, stat: String, op: String, value: float, feature := "") -> BuffDef:
 	var d := BuffDef.new()
 	d.id = id
 	d.title = title
@@ -27,6 +27,7 @@ func _buff(id: String, title: String, desc: String, stream: String, stat: String
 	d.stat = stat
 	d.op = op
 	d.value = value
+	d.feature = feature
 	return d
 
 
@@ -43,7 +44,7 @@ func _pool() -> BuffPool:
 		_buff("good_hair", "Camera-ready", "PR 15% faster", "pr", "hold_pr", "mul", 0.85),
 		_buff("running_shoes", "Running shoes", "move 10% faster", "mobility", "move_speed", "mul", 1.1),
 		_buff("office_chair", "Rolling chair", "move 10% faster", "mobility", "move_speed", "mul", 1.1),
-		_buff("extra_shell", "Extra shell", "toy shotgun +1 ammo", "mobility", "shotgun_ammo", "add", 1.0),
+		_buff("extra_shell", "Extra shell", "toy shotgun +1 ammo", "mobility", "shotgun_ammo", "add", 1.0, "npcs"),
 	])
 	return p
 

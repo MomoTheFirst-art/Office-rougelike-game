@@ -5,6 +5,7 @@ extends Resource
 @export var id := ""
 @export var title := ""
 @export var description := ""
+@export var feature := ""  # a Balance.unlock_levels key; empty means always available
 @export var stream := ""  # tickets, bugs, business, pr, or mobility
 @export var stat := ""
 @export var op := "mul"
