@@ -15,6 +15,20 @@ var npc_targets: Array[Node3D] = []  # what the toy shotgun can hit
 var b: Balance  # set by the Office; used when firing from input
 var scripted_move := Vector2.ZERO
 var use_scripted := false
+var index := 0  # picks the shirt colour
+var bounds := Rect2()  # x/z walls; an empty rect means unbounded
+var visual: Node3D
+
+const SHIRTS := [Color(0.25, 0.5, 0.95), Color(0.9, 0.3, 0.3), Color(0.3, 0.75, 0.4), Color(0.95, 0.75, 0.2)]
+
+
+static func shirt_color(i: int) -> Color:
+	return SHIRTS[i % SHIRTS.size()]
+
+
+## Yaw that turns a model facing -Z toward flat direction f.
+static func yaw_for(f: Vector3) -> float:
+	return atan2(-f.x, -f.z)
 
 
 func _ready() -> void:
@@ -23,10 +37,35 @@ func _ready() -> void:
 	shape.shape = capsule
 	shape.position.y = capsule.height / 2.0
 	add_child(shape)
-	var mesh := MeshInstance3D.new()
-	mesh.mesh = CapsuleMesh.new()
-	mesh.position.y = capsule.height / 2.0
-	add_child(mesh)
+	visual = CharacterArt.build(shirt_color(index), Color(0.25, 0.15, 0.1))
+	add_child(visual)
+	var marker := Node3D.new()
+	marker.name = "Marker"
+	add_child(marker)
+	marker.position.y = 2.2
+	var text := Label3D.new()
+	text.name = "Text"
+	text.text = "YOU"
+	text.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	text.no_depth_test = true
+	text.font_size = 48
+	text.pixel_size = 0.008
+	text.outline_size = 12
+	text.modulate = Color(1.0, 0.9, 0.2)
+	text.outline_modulate = Color.BLACK
+	marker.add_child(text)
+	var arrow := MeshInstance3D.new()
+	arrow.name = "Arrow"
+	var cone := CylinderMesh.new()
+	cone.top_radius = 0.0
+	cone.bottom_radius = 0.2
+	cone.height = 0.35
+	cone.material = StandardMaterial3D.new()
+	cone.material.albedo_color = Color(1.0, 0.9, 0.2)
+	arrow.mesh = cone
+	arrow.position.y = -0.4
+	arrow.rotation.x = PI  # point down at the head
+	marker.add_child(arrow)
 
 
 func stat_mult(key: String) -> float:
@@ -95,6 +134,11 @@ func step(delta: float) -> void:
 		fire(npc_targets, b)
 	velocity = Vector3(dir.x, 0.0, dir.y) * BASE_SPEED * move_mult * stat_mult("move_speed")
 	move_and_slide()
+	if bounds.has_area():
+		global_position.x = clampf(global_position.x, bounds.position.x, bounds.end.x)
+		global_position.z = clampf(global_position.z, bounds.position.y, bounds.end.y)
+	if visual != null:
+		visual.rotation.y = lerp_angle(visual.rotation.y, yaw_for(facing), 1.0 - exp(-14.0 * delta))
 
 
 func _physics_process(delta: float) -> void:

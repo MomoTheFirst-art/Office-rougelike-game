@@ -32,8 +32,12 @@ func setup(station_kind: String, hold: float, size: Vector3, color: Color) -> vo
 	add_child(mesh)
 	label = Label3D.new()
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.pixel_size = 0.012
-	label.position.y = size.y + 0.8
+	label.pixel_size = 0.008
+	label.font_size = 56
+	label.outline_size = 14
+	label.outline_modulate = Color.BLACK
+	label.no_depth_test = true  # never hidden behind a desk or a head
+	label.position.y = size.y + 1.8
 	add_child(label)
 
 

@@ -9,21 +9,26 @@ var director: RunDirector
 var player_list: Array[Player] = []
 var b: Balance
 var npcs: Array[Node3D] = []  # hidden and frozen during meetings
+var camera: FollowCamera
 
 
 func _ready() -> void:
 	InputSetup.register()
 	b = load("res://data/balance.tres") as Balance
 	_build_floor()
-	_build_camera()
+	add_child(OfficeArt.room(FLOOR_SIZE))
+	add_child(OfficeArt.decor())
 	players_root = Node3D.new()
 	players_root.name = "Players"
 	add_child(players_root)
 	var p := Player.new()
 	p.name = "Player1"
+	p.index = 0
+	p.bounds = Rect2(-11.4, -7.2, 22.8, 14.4)  # just inside the walls
 	players_root.add_child(p)
 	p.position = Vector3(0, 0, 3)
 	player_list.append(p)
+	_build_camera(p)
 	director = RunDirector.new()
 	director.b = b
 	add_child(director)
@@ -119,6 +124,7 @@ func _show_stations() -> void:
 
 ## The floor clears for a meeting: only the pads remain.
 func _on_meeting_started(_def) -> void:
+	camera.override_focus = Vector3.ZERO  # the pads are in the middle
 	for s in director.stations:
 		s.visible = false
 	for n in npcs:
@@ -134,6 +140,7 @@ func _on_run_ended(_result: Dictionary) -> void:
 
 
 func _on_meeting_ended(_def, _pad: int) -> void:
+	camera.override_focus = null
 	_show_stations()
 	_set_npcs_active(true)
 
@@ -142,8 +149,13 @@ func _add_station(kind: String, hold: float, pos: Vector3, color: Color) -> Stat
 	var s := Station.new()
 	s.name = kind.capitalize()
 	add_child(s)
-	s.setup(kind, hold, Vector3(2, 1, 2), color)
+	s.setup(kind, hold, Vector3(2, 0.1, 2), color)  # flat pad: stand here
 	s.position = pos
+	var prop := OfficeArt.prop_for(kind)
+	if prop != null:
+		s.add_child(prop)
+		prop.position = Vector3(0, 0, -1.5)
+	s.label.position.y = 2.6
 	s.players = player_list
 	s.completed.connect(func(pl: Player): director.on_station_completed(kind, pl))
 	director.register_station(s)
@@ -161,18 +173,33 @@ func _build_floor() -> void:
 	var mesh := MeshInstance3D.new()
 	var box_mesh := BoxMesh.new()
 	box_mesh.size = FLOOR_SIZE
+	box_mesh.material = StandardMaterial3D.new()
+	box_mesh.material.albedo_color = Color(0.55, 0.5, 0.45)  # carpet
+	box_mesh.material.roughness = 1.0
 	mesh.mesh = box_mesh
 	body.add_child(mesh)
 	body.position.y = -FLOOR_SIZE.y / 2.0
 	add_child(body)
-	var light := DirectionalLight3D.new()
-	light.rotation_degrees = Vector3(-55, 30, 0)
-	add_child(light)
+	var env := WorldEnvironment.new()
+	env.name = "Environment"
+	env.environment = Environment.new()
+	env.environment.background_mode = Environment.BG_COLOR
+	env.environment.background_color = Color(0.13, 0.15, 0.22)
+	env.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.environment.ambient_light_color = Color(0.75, 0.75, 0.8)
+	env.environment.ambient_light_energy = 0.8
+	env.environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	add_child(env)
+	var sun := DirectionalLight3D.new()
+	sun.name = "Sun"
+	sun.rotation_degrees = Vector3(-55, 30, 0)
+	sun.shadow_enabled = true
+	add_child(sun)
 
 
-func _build_camera() -> void:
-	var cam := Camera3D.new()
-	cam.name = "Camera"
-	add_child(cam)
-	cam.position = Vector3(0, 16, 12)
-	cam.look_at(Vector3.ZERO)
+func _build_camera(target: Player) -> void:
+	camera = FollowCamera.new()
+	camera.name = "Camera"
+	camera.target = target
+	add_child(camera)
+	camera.snap()

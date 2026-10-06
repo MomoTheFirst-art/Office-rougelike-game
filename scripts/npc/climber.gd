@@ -15,6 +15,7 @@ var state := State.IDLE
 var cooldown_left := 0.0
 var callout: Station  # the "call him out" spot; follows him as a child
 var _timer := 0.0
+var visual: Node3D
 
 
 func _ready() -> void:
@@ -23,12 +24,8 @@ func _ready() -> void:
 	shape.shape = capsule
 	shape.position.y = capsule.height / 2.0
 	add_child(shape)
-	var mesh := MeshInstance3D.new()
-	mesh.mesh = CapsuleMesh.new()
-	mesh.mesh.material = StandardMaterial3D.new()
-	mesh.mesh.material.albedo_color = Color(0.8, 0.1, 0.5)
-	mesh.position.y = capsule.height / 2.0
-	add_child(mesh)
+	visual = CharacterArt.build(Color(0.75, 0.15, 0.5), Color(0.1, 0.1, 0.1))
+	add_child(visual)
 
 
 func interval() -> float:
@@ -93,6 +90,8 @@ func _move_toward(to: Vector3) -> void:
 	var dir := Vector3(to.x - global_position.x, 0.0, to.z - global_position.z).normalized()
 	velocity = dir * b.climber_speed
 	move_and_slide()
+	if dir != Vector3.ZERO:
+		visual.rotation.y = lerp_angle(visual.rotation.y, Player.yaw_for(dir), 0.25)
 
 
 func _physics_process(delta: float) -> void:
