@@ -27,6 +27,7 @@ func _ready() -> void:
 	add_child(director)
 	_build_stations()
 	director.start(player_list, int(Time.get_ticks_usec()), RunDirector.carried_level)
+	_apply_ladder()
 	var hud := Hud.new()
 	add_child(hud)
 	hud.setup(director)
@@ -36,6 +37,14 @@ func _build_stations() -> void:
 	for x in [-8.0, -5.0, -2.0]:
 		_add_station("pc", b.hold_pc, Vector3(x, 0, -5), Color(0.3, 0.5, 0.9))
 	_add_station("phone", b.hold_phone, Vector3(4, 0, -5), Color(0.9, 0.7, 0.2))
+	_add_station("devtable", b.hold_devtable, Vector3(9, 0, -2), Color(0.8, 0.25, 0.25))
+
+
+## Locked features are hidden (the director also keeps them disabled).
+func _apply_ladder() -> void:
+	for s in director.stations:
+		if s.kind == "devtable":
+			s.visible = Rules.unlocked("stability", director.level, b)
 
 
 func _add_station(kind: String, hold: float, pos: Vector3, color: Color) -> Station:

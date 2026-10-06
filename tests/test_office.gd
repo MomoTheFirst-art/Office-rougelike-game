@@ -4,6 +4,17 @@ var tree: SceneTree
 const DT := 1.0 / 60.0
 
 
+func test_devtable_hidden_below_level_2_and_visible_from_2() -> void:
+	for lvl in [1, 2]:
+		RunDirector.carried_level = lvl
+		var office: Node3D = load("res://main.tscn").instantiate()
+		tree.root.add_child(office)
+		var dev: Station = office.get_node("Devtable")
+		T.eq(dev.visible, lvl >= 2, "devtable visibility at level %d" % lvl)
+		office.free()
+	RunDirector.carried_level = 1
+
+
 func test_standing_at_a_pc_solves_a_ticket_through_the_office_wiring() -> void:
 	var office: Node3D = load("res://main.tscn").instantiate()
 	tree.root.add_child(office)

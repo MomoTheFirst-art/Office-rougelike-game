@@ -5,6 +5,7 @@ extends CanvasLayer
 var director: RunDirector
 var _status: Label
 var _sat: ProgressBar
+var _stab: ProgressBar
 var _queue: Label
 var _end: Label
 
@@ -20,6 +21,11 @@ func setup(d: RunDirector) -> void:
 	_sat.custom_minimum_size = Vector2(260, 24)
 	_sat.max_value = 100.0
 	box.add_child(_sat)
+	_stab = ProgressBar.new()
+	_stab.custom_minimum_size = Vector2(260, 18)
+	_stab.max_value = 100.0
+	_stab.visible = Rules.unlocked("stability", d.level, d.b)
+	box.add_child(_stab)
 	_queue = Label.new()
 	box.add_child(_queue)
 	_end = Label.new()
@@ -37,9 +43,10 @@ func _process(_delta: float) -> void:
 	_status.text = "Level %d   Time %d s   Tickets solved: %d" % [
 		director.level, ceili(director.time_left), int(director.quests["tickets"])]
 	_sat.value = director.satisfaction
+	_stab.value = director.stability
 	var lines: PackedStringArray = []
 	for it in director.items:
-		lines.append("%s  %d s" % [it.type, ceili(it.deadline)])
+		lines.append("%s  %s" % [it.type, "fix at dev table" if is_inf(it.deadline) else "%d s" % ceili(it.deadline)])
 	_queue.text = "Open work:\n" + "\n".join(lines)
 
 

@@ -32,6 +32,8 @@ extends Resource
 @export var stability_ok_level := 30.0
 @export var stability_ok_share := 0.9
 @export var bugticket_share_decay := 0.9
+@export var bug_rate_per_level := 0.25  # spontaneous bugs get this much more frequent per level above 2
+@export var outage_ticket_every := 20.0  # seconds between extra tickets while stability is 0
 
 @export_group("Work items")
 @export var deadline_ticket := 40.0
