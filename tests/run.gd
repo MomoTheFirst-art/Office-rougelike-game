@@ -4,6 +4,7 @@ extends SceneTree
 
 
 func _initialize() -> void:
+	await process_frame  # the tree is not live inside _initialize
 	var total := 0
 	for f in DirAccess.get_files_at("res://tests"):
 		if not (f.begins_with("test_") and f.ends_with(".gd")):
