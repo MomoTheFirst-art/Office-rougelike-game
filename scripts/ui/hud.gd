@@ -40,20 +40,23 @@ func setup(d: RunDirector) -> void:
 func _process(_delta: float) -> void:
 	if director == null:
 		return
-	_status.text = "Level %d   Time %d s   Tickets solved: %d" % [
-		director.level, ceili(director.time_left), int(director.quests["tickets"])]
+	_status.text = "Level %d   Time %d s" % [director.level, ceili(director.time_left)]
 	_sat.value = director.satisfaction
 	_stab.value = director.stability
 	var lines: PackedStringArray = []
 	for it in director.items:
 		lines.append("%s  %s" % [it.type, "fix at dev table" if is_inf(it.deadline) else "%d s" % ceili(it.deadline)])
-	_queue.text = "Open work:\n" + "\n".join(lines)
+	var quest_lines: PackedStringArray = []
+	for q in director.active_quests():
+		quest_lines.append("%s: %d / %d" % [q, int(director.quest_progress(q)), int(director.quest_target(q))])
+	_queue.text = "Quests:\n" + "\n".join(quest_lines) + "\n\nOpen work:\n" + "\n".join(lines)
 
 
 func _on_run_ended(r: Dictionary) -> void:
 	var title := "YOU WERE FIRED" if r["outcome"] == "fired" else "WORKDAY OVER"
-	_end.text = "%s\nTickets solved: %d\nSatisfaction: %d\n\nPress Enter to restart" % [
-		title, int(r["quests"]["tickets"]), int(r["satisfaction"])]
+	var promo := "PROMOTED! Next run is level %d" % RunDirector.carried_level if r["promoted"] else "No promotion"
+	_end.text = "%s\nSatisfaction: %d   Bonus: %d\n%s\n\nPress Enter to restart" % [
+		title, int(r["satisfaction"]), r["bonus"], promo]
 	_end.visible = true
 
 

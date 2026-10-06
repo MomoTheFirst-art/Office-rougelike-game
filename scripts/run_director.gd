@@ -18,8 +18,11 @@ var running := false
 var outcome := ""
 var stations: Array[Station] = []
 var bugticket_share := 0.0
+var rival_bar := 0.0  # set by the Climber (Task 9)
 var _ticket_timer := 0.0
 var _bug_timer := 0.0
+var _lead_timer := 0.0
+var _pr_timer := 0.0
 var _outage_timer := 0.0
 
 
@@ -37,6 +40,8 @@ func start(p: Array[Player], seed_value: int, run_level := 1) -> void:
 	bugticket_share = b.bugticket_share
 	_ticket_timer = b.interval_ticket * 0.25
 	_bug_timer = _bug_interval()
+	_lead_timer = b.interval_lead * 0.25
+	_pr_timer = b.interval_pr * 0.25
 	_outage_timer = 0.0
 	running = true
 
@@ -81,7 +86,7 @@ func tick(dt: float) -> void:
 		it.deadline -= dt
 		if it.deadline <= 0.0:
 			items.erase(it)
-			satisfaction += b.sat_expire
+			satisfaction += it.expire_cost(b)
 			EventBus.item_expired.emit(it)
 	if Rules.unlocked("stability", level, b):
 		_tick_stability(dt)
@@ -90,6 +95,7 @@ func tick(dt: float) -> void:
 		s.enabled = it != null
 		if it != null:
 			s.stream = it.stream()
+			s.hold_mult = it.hold_mult(b)
 	satisfaction = clampf(satisfaction, 0.0, 100.0)
 	if satisfaction <= 0.0:
 		end_run("fired")
@@ -127,11 +133,48 @@ func end_run(reason: String) -> void:
 		return
 	running = false
 	outcome = reason
-	EventBus.run_ended.emit(result())
+	var r := result()
+	if r["promoted"]:
+		carried_level = level + 1
+	EventBus.run_ended.emit(r)
+
+
+func quest_target(q: String) -> float:
+	var p := maxi(players.size(), 1)
+	match q:
+		"tickets":
+			return Rules.ticket_target(p, level, b)
+		"stability":
+			return b.run_seconds * b.stability_ok_share  # seconds above the ok level
+		"pr":
+			return Rules.pr_target(level, b)
+		"revenue":
+			return Rules.revenue_target(p, level, b)
+	return 0.0
+
+
+func quest_progress(q: String) -> float:
+	return quests["stable_s"] if q == "stability" else quests[q]
+
+
+func ratios() -> Array[float]:
+	var r: Array[float] = []
+	for q in active_quests():
+		r.append(Rules.quest_ratio(quest_progress(q), quest_target(q)))
+	return r
 
 
 func result() -> Dictionary:
-	return {"outcome": outcome, "satisfaction": satisfaction, "quests": quests.duplicate()}
+	var r := ratios()
+	var fired := outcome == "fired"
+	return {
+		"outcome": outcome,
+		"satisfaction": satisfaction,
+		"quests": quests.duplicate(),
+		"ratios": r,
+		"bonus": Rules.bonus(r, level, satisfaction, fired, b),
+		"promoted": not fired and Rules.promoted(satisfaction, rival_bar, b),
+	}
 
 
 func _bug_interval() -> float:
@@ -148,6 +191,16 @@ func _spawn_work(dt: float) -> void:
 		if _bug_timer <= 0.0:
 			_bug_timer += _bug_interval()
 			_new_item("bug", INF)
+	if Rules.unlocked("leads", level, b):
+		_lead_timer -= dt
+		if _lead_timer <= 0.0:
+			_lead_timer += b.interval_lead
+			_new_item("lead", b.deadline_lead).size = rng.randi_range(0, 2)
+	if Rules.unlocked("pr", level, b):
+		_pr_timer -= dt
+		if _pr_timer <= 0.0:
+			_pr_timer += b.interval_pr
+			_new_item("pr", b.deadline_pr)
 
 
 func _spawn_ticket() -> void:
@@ -178,7 +231,7 @@ func _tick_stability(dt: float) -> void:
 func _new_item(type: String, deadline: float) -> WorkItem:
 	var it := WorkItem.new()
 	it.type = type
-	it.deadline = deadline
+	it.deadline = deadline * Rules.timer_scale(level)
 	items.append(it)
 	EventBus.item_spawned.emit(it)
 	return it

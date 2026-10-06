@@ -4,13 +4,16 @@ var tree: SceneTree
 const DT := 1.0 / 60.0
 
 
-func test_devtable_hidden_below_level_2_and_visible_from_2() -> void:
-	for lvl in [1, 2]:
+func test_locked_stations_are_hidden_by_level() -> void:
+	# level -> [devtable, sales, studio] visible
+	var want := {1: [false, false, false], 2: [true, false, false], 3: [true, false, true], 4: [true, true, true]}
+	for lvl: int in want:
 		RunDirector.carried_level = lvl
 		var office: Node3D = load("res://main.tscn").instantiate()
 		tree.root.add_child(office)
-		var dev: Station = office.get_node("Devtable")
-		T.eq(dev.visible, lvl >= 2, "devtable visibility at level %d" % lvl)
+		var got := [
+			office.get_node("Devtable").visible, office.get_node("Sales").visible, office.get_node("Studio").visible]
+		T.eq(got, want[lvl], "devtable/sales/studio visible at level %d" % lvl)
 		office.free()
 	RunDirector.carried_level = 1
 

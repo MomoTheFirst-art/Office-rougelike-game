@@ -54,6 +54,9 @@ extends Resource
 @export var revenue_base := 2000.0
 @export var pr_base := 6.0
 @export var pr_per_level := 2.0
+@export var ticket_level_growth := 0.2
+@export var revenue_level_growth := 0.25
+@export var payout_level_growth := 0.25
 @export var payout_per_quest := 100.0
 @export var fired_payout_share := 0.25
 
