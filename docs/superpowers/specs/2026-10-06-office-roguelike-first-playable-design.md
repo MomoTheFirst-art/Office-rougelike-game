@@ -22,6 +22,21 @@ In (first playable, built in six playable steps M1 to M6):
 
 Out (later specs): shop and persistent Bonus currency, promotion levels beyond data hooks, local co-op (stage 2), online co-op, saving, final art and audio.
 
+### Run ladder
+
+Work types unlock by career level. The level goes up only on promotion; if you are fired or miss the promotion bar you replay the same level. Locked features are neither spawned, enabled, nor shown (the HUD shows only active quests). The level lives in memory only (saving is out of scope), and `RunDirector.start` takes a level so any level can be tested directly.
+
+| Level | Adds | Active quests |
+|---|---|---|
+| 1 | Tickets by reply and call, satisfaction bar | tickets |
+| 2 | Stability bar, dev table, bug tickets | tickets, stability |
+| 3 | Company PR (post, press response, broadcast interview) | + PR |
+| 4 | New business (leads and revenue) | + revenue |
+| 5 | The three meetings and the post-meeting buff cards | same |
+| 6 | The Chatter, the Climber, the toy shotgun | same |
+
+The unlock levels live in `Balance.unlock_levels`. The Bonus payout counts only active quests, so early runs pay little.
+
 ## 3. Core interaction
 
 One reusable `Station` (`Area3D`). A player stands inside, a bar fills, leaving resets that step's bar, completion emits `completed(player)`. Seconds to fill = base seconds x the player's stat multiplier for that kind. The same component serves PC desks, phone, dev table, sales PC, studio, outbox board, meeting pads, and the "call out the rival" spot. A station works the open item nearest its deadline; there are no menus.
@@ -64,7 +79,7 @@ Work items spawn on timers from `RunDirector`; rates scale with career level and
 | Stability target | bar above 30% for 90% of the run |
 | PR target | `6 + 2 * L` PR points |
 | Quest ratio | `r = min(progress / target, 1.5)` |
-| Run payout (Bonus) | sum over the four quests of `100 * r * (1 + 0.25 * (L - 1))`, plus end satisfaction (0 to 100) |
+| Run payout (Bonus) | sum over the quests active at that level of `100 * r * (1 + 0.25 * (L - 1))`, plus end satisfaction (0 to 100) |
 | Fired | 25% of the quest payout |
 | Promotion | needs end satisfaction of 90 or more and the rival's bar below 100; then `L + 1`; task timers x `0.92^(L - 1)`, floor x 0.5 |
 | Shop cost (later) | rank `n` costs `200 * 1.6^(n - 1)`; +6% per rank, 5 ranks max |
@@ -131,6 +146,8 @@ Each step is playable and ends with tests and a commit.
 ## 12. Assumptions to confirm
 
 - Tone is comedic (not yet confirmed).
+- The unlock order for levels 4 to 6 (business, then meetings, then NPCs) is a suggestion that you approved; levels 1 to 3 were your choice.
+- The level resets when the game closes.
 - Work deadlines keep running during meetings.
 - Promotion threshold is 90 satisfaction, not exactly 100.
 - The Stability quest target and all timings and numbers are placeholders.
