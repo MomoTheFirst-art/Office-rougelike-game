@@ -15,6 +15,7 @@ var progress := 0.0  # 0..1, advances only while enabled
 var players: Array[Player] = []
 var half := Vector2(1.0, 1.0)
 var label: Label3D
+var caption := ""  # shown instead of the kind when set (meeting pads)
 
 
 func setup(station_kind: String, hold: float, size: Vector3, color: Color) -> void:
@@ -65,7 +66,7 @@ func tick(delta: float) -> void:
 func _update_label() -> void:
 	if label == null:
 		return
-	label.text = kind + (" *" if enabled else "")
+	label.text = (caption if caption != "" else kind) + (" *" if enabled and caption == "" else "")
 	if holder != null and progress > 0.0:
 		label.text += "  %d%%" % int(progress * 100.0)
 

@@ -27,7 +27,9 @@ func _ready() -> void:
 	add_child(director)
 	_build_stations()
 	director.start(player_list, int(Time.get_ticks_usec()), RunDirector.carried_level)
-	_apply_ladder()
+	_show_stations()
+	EventBus.meeting_started.connect(_on_meeting_started)
+	EventBus.meeting_ended.connect(_on_meeting_ended)
 	var hud := Hud.new()
 	add_child(hud)
 	hud.setup(director)
@@ -42,12 +44,21 @@ func _build_stations() -> void:
 	_add_station("studio", b.hold_studio, Vector3(9, 0, 4), Color(0.7, 0.4, 0.8))
 
 
-## Locked features are hidden (the director also keeps them disabled).
-func _apply_ladder() -> void:
+## Locked features stay hidden (the director also keeps them disabled).
+func _show_stations() -> void:
 	var needs := {"devtable": "stability", "sales": "leads", "studio": "pr"}
 	for s in director.stations:
-		if needs.has(s.kind):
-			s.visible = Rules.unlocked(needs[s.kind], director.level, b)
+		s.visible = not needs.has(s.kind) or Rules.unlocked(needs[s.kind], director.level, b)
+
+
+## The floor clears for a meeting: only the pads remain.
+func _on_meeting_started(_def) -> void:
+	for s in director.stations:
+		s.visible = false
+
+
+func _on_meeting_ended(_def, _pad: int) -> void:
+	_show_stations()
 
 
 func _add_station(kind: String, hold: float, pos: Vector3, color: Color) -> Station:

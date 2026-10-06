@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="MeetingDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/meeting_def.gd" id="1_cows6"]
+
+[resource]
+script = ExtResource("1_cows6")
+title = "Manager meeting"
+labels = PackedStringArray("Prioritise tickets", "Prioritise revenue", "Take the afternoon")
+previews = PackedStringArray("satisfaction +5, more tickets", "more leads for a while", "satisfaction +10, more tickets")
+effects = Array[Dictionary]([{
+"satisfaction": 5.0,
+"spawn_mult": {
+"mult": 1.3,
+"seconds": 60.0,
+"stream": "tickets"
+}
+}, {
+"spawn_mult": {
+"mult": 1.5,
+"seconds": 60.0,
+"stream": "business"
+}
+}, {
+"satisfaction": 10.0,
+"spawn_mult": {
+"mult": 1.3,
+"seconds": 45.0,
+"stream": "tickets"
+}
+}])

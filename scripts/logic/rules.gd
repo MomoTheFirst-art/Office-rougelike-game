@@ -41,6 +41,16 @@ static func promoted(end_satisfaction: float, rival_bar: float, b: Balance) -> b
 	return end_satisfaction >= b.promo_threshold and rival_bar < 100.0
 
 
+## Majority pad wins; tied pads are chosen between at random; nobody locked means all are tied.
+static func pick_meeting_pad(votes: Array[int], rng: RandomNumberGenerator) -> int:
+	var top: int = votes.max()
+	var tied: Array[int] = []
+	for i in votes.size():
+		if votes[i] == top:
+			tied.append(i)
+	return tied[rng.randi_range(0, tied.size() - 1)]
+
+
 static func timer_scale(level: int) -> float:
 	return maxf(TIMER_FLOOR, pow(TIMER_DECAY, level - 1))
 

@@ -8,6 +8,7 @@ var _sat: ProgressBar
 var _stab: ProgressBar
 var _queue: Label
 var _end: Label
+var _banner: Label
 
 
 func setup(d: RunDirector) -> void:
@@ -28,6 +29,9 @@ func setup(d: RunDirector) -> void:
 	box.add_child(_stab)
 	_queue = Label.new()
 	box.add_child(_queue)
+	_banner = Label.new()
+	_banner.add_theme_font_size_override("font_size", 24)
+	box.add_child(_banner)
 	_end = Label.new()
 	_end.visible = false
 	_end.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -43,6 +47,12 @@ func _process(_delta: float) -> void:
 	_status.text = "Level %d   Time %d s" % [director.level, ceili(director.time_left)]
 	_sat.value = director.satisfaction
 	_stab.value = director.stability
+	if director.meeting != null:
+		_banner.text = "%s: stand on a pad (%d s)" % [director.meeting.def.title, ceili(director.meeting.time_left)]
+	elif director.next_meeting_in() <= director.b.meeting_warning:
+		_banner.text = "Meeting in %d s" % ceili(director.next_meeting_in())
+	else:
+		_banner.text = ""
 	var lines: PackedStringArray = []
 	for it in director.items:
 		lines.append("%s  %s" % [it.type, "fix at dev table" if is_inf(it.deadline) else "%d s" % ceili(it.deadline)])

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="MeetingDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/meeting_def.gd" id="1_avien"]
+
+[resource]
+script = ExtResource("1_avien")
+title = "Client meeting"
+labels = PackedStringArray("Quick deal", "Big promise", "Apologise and listen")
+previews = PackedStringArray("more leads for a while", "revenue target +20%, payout +15%", "satisfaction +8")
+effects = Array[Dictionary]([{
+"spawn_mult": {
+"mult": 1.5,
+"seconds": 60.0,
+"stream": "business"
+}
+}, {
+"payout_mult": 1.15,
+"target_mult": {
+"revenue": 1.2
+}
+}, {
+"satisfaction": 8.0
+}])
