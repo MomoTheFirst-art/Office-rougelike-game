@@ -14,6 +14,7 @@ var holder: Player = null  # tracked even while disabled
 var progress := 0.0  # 0..1, advances only while enabled
 var players: Array[Player] = []
 var half := Vector2(1.0, 1.0)
+var label: Label3D
 
 
 func setup(station_kind: String, hold: float, size: Vector3, color: Color) -> void:
@@ -28,6 +29,11 @@ func setup(station_kind: String, hold: float, size: Vector3, color: Color) -> vo
 	mesh.mesh = box
 	mesh.position.y = size.y / 2.0
 	add_child(mesh)
+	label = Label3D.new()
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.pixel_size = 0.012
+	label.position.y = size.y + 0.8
+	add_child(label)
 
 
 func contains(p: Player) -> bool:
@@ -46,12 +52,22 @@ func tick(delta: float) -> void:
 				break
 	if holder == null or not enabled:
 		progress = 0.0
+		_update_label()
 		return
 	var seconds := Rules.hold_seconds(base_hold * hold_mult, holder.stats, "hold_" + stream)
 	progress += delta / (seconds / holder.work_rate)
 	if progress >= 1.0:
 		progress = 0.0
 		completed.emit(holder)
+	_update_label()
+
+
+func _update_label() -> void:
+	if label == null:
+		return
+	label.text = kind + (" *" if enabled else "")
+	if holder != null and progress > 0.0:
+		label.text += "  %d%%" % int(progress * 100.0)
 
 
 func _physics_process(delta: float) -> void:

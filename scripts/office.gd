@@ -4,10 +4,14 @@ extends Node3D
 const FLOOR_SIZE := Vector3(24.0, 0.2, 16.0)
 
 var players_root: Node3D
+var director: RunDirector
+var player_list: Array[Player] = []
+var b: Balance
 
 
 func _ready() -> void:
 	InputSetup.register()
+	b = load("res://data/balance.tres") as Balance
 	_build_floor()
 	_build_camera()
 	players_root = Node3D.new()
@@ -17,6 +21,33 @@ func _ready() -> void:
 	p.name = "Player1"
 	players_root.add_child(p)
 	p.position = Vector3(0, 0, 3)
+	player_list.append(p)
+	director = RunDirector.new()
+	director.b = b
+	add_child(director)
+	_build_stations()
+	director.start(player_list, int(Time.get_ticks_usec()), RunDirector.carried_level)
+	var hud := Hud.new()
+	add_child(hud)
+	hud.setup(director)
+
+
+func _build_stations() -> void:
+	for x in [-8.0, -5.0, -2.0]:
+		_add_station("pc", b.hold_pc, Vector3(x, 0, -5), Color(0.3, 0.5, 0.9))
+	_add_station("phone", b.hold_phone, Vector3(4, 0, -5), Color(0.9, 0.7, 0.2))
+
+
+func _add_station(kind: String, hold: float, pos: Vector3, color: Color) -> Station:
+	var s := Station.new()
+	s.name = kind.capitalize()
+	add_child(s)
+	s.setup(kind, hold, Vector3(2, 1, 2), color)
+	s.position = pos
+	s.players = player_list
+	s.completed.connect(func(pl: Player): director.on_station_completed(kind, pl))
+	director.register_station(s)
+	return s
 
 
 func _build_floor() -> void:
