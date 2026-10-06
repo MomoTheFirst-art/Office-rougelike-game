@@ -60,6 +60,15 @@ extends Resource
 @export var payout_per_quest := 100.0
 @export var fired_payout_share := 0.25
 
+@export_group("Chatter")
+@export var chatter_speed := 2.5
+@export var chatter_reach := 1.5
+@export var chatter_talk := 5.0
+@export var chatter_cooldown := 20.0
+@export var chatter_move_mult := 0.3
+@export var chatter_work_mult := 0.5
+@export var stun_chatter := 4.0
+
 @export_group("Meetings and buffs")
 @export var meeting_times := PackedFloat32Array([0.25, 0.5, 0.75])
 @export var meeting_countdown := 15.0

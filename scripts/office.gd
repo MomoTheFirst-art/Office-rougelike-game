@@ -7,6 +7,7 @@ var players_root: Node3D
 var director: RunDirector
 var player_list: Array[Player] = []
 var b: Balance
+var npcs: Array[Node3D] = []  # hidden and frozen during meetings
 
 
 func _ready() -> void:
@@ -28,6 +29,7 @@ func _ready() -> void:
 	_build_stations()
 	director.start(player_list, int(Time.get_ticks_usec()), RunDirector.carried_level)
 	_show_stations()
+	_build_npcs()
 	EventBus.meeting_started.connect(_on_meeting_started)
 	EventBus.meeting_ended.connect(_on_meeting_ended)
 	var hud := Hud.new()
@@ -44,6 +46,28 @@ func _build_stations() -> void:
 	_add_station("studio", b.hold_studio, Vector3(9, 0, 4), Color(0.7, 0.4, 0.8))
 
 
+func _build_npcs() -> void:
+	if not Rules.unlocked("npcs", director.level, b):
+		return
+	var chatter := Chatter.new()
+	chatter.name = "Chatter"
+	chatter.b = b
+	chatter.level = director.level
+	chatter.players = player_list
+	chatter.stations = director.stations
+	add_child(chatter)
+	chatter.position = Vector3(-10, 0, 6)
+	chatter.home = chatter.position
+	chatter.cooldown_left = chatter.cooldown_seconds() * 0.5
+	npcs.append(chatter)
+
+
+func _set_npcs_active(on: bool) -> void:
+	for n in npcs:
+		n.visible = on
+		n.set_physics_process(on)
+
+
 ## Locked features stay hidden (the director also keeps them disabled).
 func _show_stations() -> void:
 	var needs := {"devtable": "stability", "sales": "leads", "studio": "pr"}
@@ -55,10 +79,12 @@ func _show_stations() -> void:
 func _on_meeting_started(_def) -> void:
 	for s in director.stations:
 		s.visible = false
+	_set_npcs_active(false)
 
 
 func _on_meeting_ended(_def, _pad: int) -> void:
 	_show_stations()
+	_set_npcs_active(true)
 
 
 func _add_station(kind: String, hold: float, pos: Vector3, color: Color) -> Station:

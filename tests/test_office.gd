@@ -39,6 +39,30 @@ func test_floor_clears_during_a_meeting_and_returns() -> void:
 	RunDirector.carried_level = 1
 
 
+func test_chatter_exists_only_from_level_6_and_leaves_during_meetings() -> void:
+	RunDirector.carried_level = 5
+	var l5: Node3D = load("res://main.tscn").instantiate()
+	tree.root.add_child(l5)
+	T.truth(not l5.has_node("Chatter"), "no Chatter at level 5")
+	l5.free()
+	RunDirector.carried_level = 6
+	var office: Node3D = load("res://main.tscn").instantiate()
+	tree.root.add_child(office)
+	T.truth(office.has_node("Chatter"), "Chatter at level 6")
+	var chatter: Chatter = office.get_node("Chatter")
+	var d: RunDirector = office.director
+	d.meeting_at = [0.5, 1.0e9, 1.0e9] as Array[float]
+	for i in int(1.0 / DT):
+		d.tick(DT)
+	T.truth(d.meeting != null, "meeting open")
+	T.eq([chatter.visible, chatter.is_physics_processing()], [false, false], "Chatter gone during the meeting")
+	for i in int(16.0 / DT):
+		d.tick(DT)
+	T.eq([chatter.visible, chatter.is_physics_processing()], [true, true], "Chatter back")
+	office.free()
+	RunDirector.carried_level = 1
+
+
 func test_standing_at_a_pc_solves_a_ticket_through_the_office_wiring() -> void:
 	var office: Node3D = load("res://main.tscn").instantiate()
 	tree.root.add_child(office)
