@@ -43,13 +43,16 @@ func test_chatter_exists_only_from_level_6_and_leaves_during_meetings() -> void:
 	RunDirector.carried_level = 5
 	var l5: Node3D = load("res://main.tscn").instantiate()
 	tree.root.add_child(l5)
-	T.truth(not l5.has_node("Chatter"), "no Chatter at level 5")
+	T.truth(not l5.has_node("Chatter") and not l5.has_node("Shelf"), "no Chatter or shelf at level 5")
+	T.eq(l5.player_list[0].npc_targets.size(), 0, "nothing to shoot at level 5")
 	l5.free()
 	RunDirector.carried_level = 6
 	var office: Node3D = load("res://main.tscn").instantiate()
 	tree.root.add_child(office)
 	T.truth(office.has_node("Chatter"), "Chatter at level 6")
-	T.truth(office.has_node("Climber") and office.has_node("Outbox"), "Climber and outbox at level 6")
+	T.truth(office.has_node("Climber") and office.has_node("Outbox") and office.has_node("Shelf"), "Climber, outbox and shelf at level 6")
+	T.eq(office.player_list[0].npc_targets.size(), 2, "the shotgun can hit both NPCs")
+	T.truth(office.player_list[0].b != null, "player knows the balance for firing")
 	var chatter: Chatter = office.get_node("Chatter")
 	var climber: Climber = office.get_node("Climber")
 	var d: RunDirector = office.director

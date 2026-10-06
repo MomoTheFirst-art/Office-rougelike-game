@@ -79,6 +79,14 @@ extends Resource
 @export var climber_away := 30.0  # seconds sent away after being called out
 @export var stun_climber := 5.0
 
+@export_group("Toy shotgun")
+@export var shotgun_ammo := 3
+@export var shotgun_cone_deg := 12.0  # half-angle either side of where you face: forgiving on purpose
+@export var shotgun_range := 8.0
+@export var shotgun_cooldown := 0.8
+@export var shotgun_respawn := 20.0  # seconds after it is used up
+@export var shotgun_pickup_radius := 1.5
+
 @export_group("Meetings and buffs")
 @export var meeting_times := PackedFloat32Array([0.25, 0.5, 0.75])
 @export var meeting_countdown := 15.0

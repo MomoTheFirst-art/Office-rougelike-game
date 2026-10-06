@@ -56,6 +56,8 @@ func _process(_delta: float) -> void:
 	if director == null:
 		return
 	_status.text = "Level %d   Time %d s" % [director.level, ceili(director.time_left)]
+	if Rules.unlocked("npcs", director.level, director.b) and not director.players.is_empty():
+		_status.text += "   Shells: %d  (Space to fire)" % director.players[0].ammo
 	_sat.value = director.satisfaction
 	_stab.value = director.stability
 	_rival.value = director.rival_bar

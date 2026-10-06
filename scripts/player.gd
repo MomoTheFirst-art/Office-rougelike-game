@@ -9,6 +9,10 @@ var work_rate := 1.0  # below 1 while the Chatter talks to us
 var move_mult := 1.0
 var actions: Dictionary = {}  # stream -> count of finished items
 var ammo := 0
+var facing := Vector3(0, 0, -1)  # last direction we moved in
+var fire_cooldown := 0.0
+var npc_targets: Array[Node3D] = []  # what the toy shotgun can hit
+var b: Balance  # set by the Office; used when firing from input
 var scripted_move := Vector2.ZERO
 var use_scripted := false
 
@@ -58,8 +62,37 @@ func intent_move() -> Vector2:
 	return Input.get_vector("move_left", "move_right", "move_up", "move_down")
 
 
-func step(_delta: float) -> void:
+## Toy shotgun. A miss still spends the shell. Returns false only if it could not fire at all.
+func fire(targets: Array[Node3D], bal: Balance) -> bool:
+	if ammo <= 0 or fire_cooldown > 0.0:
+		return false
+	ammo -= 1
+	fire_cooldown = bal.shotgun_cooldown
+	var best: Node3D = null
+	var best_d := INF
+	for t in targets:
+		if not is_instance_valid(t) or t is Player:
+			continue
+		var to: Vector3 = t.global_position - global_position
+		to.y = 0.0
+		var d := to.length()
+		if d > bal.shotgun_range or rad_to_deg(facing.angle_to(to)) > bal.shotgun_cone_deg:
+			continue
+		if d < best_d:
+			best = t
+			best_d = d
+	if best != null:
+		best.stun(bal.stun_climber if best is Climber else bal.stun_chatter)
+	return true
+
+
+func step(delta: float) -> void:
+	fire_cooldown = maxf(0.0, fire_cooldown - delta)
 	var dir := intent_move()
+	if dir != Vector2.ZERO:
+		facing = Vector3(dir.x, 0.0, dir.y).normalized()
+	if not use_scripted and b != null and Input.is_action_just_pressed("fire"):
+		fire(npc_targets, b)
 	velocity = Vector3(dir.x, 0.0, dir.y) * BASE_SPEED * move_mult * stat_mult("move_speed")
 	move_and_slide()
 

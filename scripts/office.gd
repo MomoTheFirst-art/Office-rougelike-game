@@ -80,6 +80,16 @@ func _build_npcs() -> void:
 	callout.completed.connect(func(_pl: Player): climber.call_out())
 	climber.callout = callout
 	npcs.append(climber)
+	var shelf := ShotgunShelf.new()
+	shelf.name = "Shelf"
+	shelf.b = b
+	shelf.players = player_list
+	add_child(shelf)
+	shelf.position = Vector3(-11, 0, -6.5)
+	npcs.append(shelf)
+	for p in player_list:
+		p.b = b
+		p.npc_targets = [chatter, climber] as Array[Node3D]
 
 
 ## The board where finished work posts its credit; the Climber walks here to steal it.
