@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="MeetingDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/meeting_def.gd" id="1_omytg"]
+
+[resource]
+script = ExtResource("1_omytg")
+title = "CEO meeting"
+labels = PackedStringArray("Stretch target", "Steady as she goes", "Free pizza")
+previews = PackedStringArray("all targets +20%, payout +25%", "satisfaction +5", "satisfaction +8, a few more tickets")
+effects = Array[Dictionary]([{
+"payout_mult": 1.25,
+"target_mult": {
+"pr": 1.2,
+"revenue": 1.2,
+"tickets": 1.2
+}
+}, {
+"satisfaction": 5.0
+}, {
+"satisfaction": 8.0,
+"spawn_mult": {
+"mult": 1.2,
+"seconds": 30.0,
+"stream": "tickets"
+}
+}])

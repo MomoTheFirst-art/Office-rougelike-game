@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="Balance" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/balance.gd" id="1_2gprt"]
+
+[resource]
+script = ExtResource("1_2gprt")
+lead_values = PackedInt32Array(500, 1200, 2500)
+lead_hold_mult = PackedFloat32Array(1, 1.25, 1.5)
+meeting_times = PackedFloat32Array(0.25, 0.5, 0.75)
